@@ -81,8 +81,9 @@ async function runCheck() {
                     if (currentFirmRaw === "NOT_REGISTERED" || currentFirmRaw === "FIRM_LINK_NOT_FOUND") {
                         status = "Missed Opportunity"; //If no longer active or no longer a broker
                     } else {
-                        const isMatch = cleanName(currentFirmRaw).includes(cleanName(expectedRaw)) ||
-                            cleanName(expectedRaw).includes(cleanName(currentFirmRaw));
+                        const isMatch = cleanName(currentFirmRaw).includes(cleanName(expectedRaw)) 
+                            // ||
+                            // cleanName(expectedRaw).includes(cleanName(currentFirmRaw));
                         status = isMatch ? "Good" : "New Company"; // still a broker but on a different company
                     }
 
