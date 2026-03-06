@@ -32,10 +32,9 @@ async function runCheck() {
             // Initialize Progress Bar
             const progressBar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
             progressBar.start(total, 0);
-
-            // const browser = await puppeteer.launch({ headless: "new" });
+            
             const browser = await puppeteer.launch({
-                headless: false, // This opens a physical Chrome window so you can watch
+                headless: 'new', // mark as 'new' if don't want to see browser to appear, mark false for tshooting
                 defaultViewport: null,
                 args: ['--start-maximized']
             });
@@ -54,14 +53,14 @@ async function runCheck() {
 
                 try {
                     // 1. Wait for the page to load
-                    await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
+                    await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
 
                     // 2. WAIT specifically for the tag YOU found in your screenshot
                     // This is much more reliable than generic classes
-                    await page.waitForSelector('investor-tools-current-registrations', { timeout: 15000 });
+                    await page.waitForSelector('investor-tools-current-registrations', { timeout: 60000 });
 
                     // Take the screenshot AFTER the element is confirmed to exist
-                    await page.screenshot({ path: `debug_${finraId}.png` });
+                    // await page.screenshot({ path: `debug_${finraId}.png` });
 
                     // 3. Extract the data
                     currentFirmRaw = await page.evaluate(() => {
@@ -80,16 +79,16 @@ async function runCheck() {
 
                     // 4. Match Logic
                     if (currentFirmRaw === "NOT_REGISTERED" || currentFirmRaw === "FIRM_LINK_NOT_FOUND") {
-                        status = "missed opportunity";
+                        status = "Missed Opportunity"; //If no longer active or no longer a broker
                     } else {
                         const isMatch = cleanName(currentFirmRaw).includes(cleanName(expectedRaw)) ||
                             cleanName(expectedRaw).includes(cleanName(currentFirmRaw));
-                        status = isMatch ? "good" : "missed opportunity";
+                        status = isMatch ? "Good" : "New Company"; // still a broker but on a different company
                     }
 
                 } catch (err) {
                     // If we time out, take a screenshot of the ERROR state to see why
-                    await page.screenshot({ path: `error_${finraId}.png` });
+                    //await page.screenshot({ path: `error_${finraId}.png` });
                     status = "Timeout/Error";
                     console.log(`\n[!] Skipping ${finraId}: View error_${finraId}.png to see the page state.`);
                 }
